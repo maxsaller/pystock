@@ -1,8 +1,7 @@
 import os
-import sys
 import bs4
-import time
 import requests as rq
+import multiprocessing as mp
 
 
 class Stock():
@@ -41,7 +40,6 @@ class Stock():
         filtr = "DIVIDEND_AND_YIELD-value"
         dividend = self.soup.find("td", {"data-test": filtr}).get_text()
         self.dat["dividend"] = float(dividend.split()[0])
-        self.dat["dividend_pct"] = 0.01 * float(dividend.split()[-1][1:-2])
 
     def get_price(self):
         price = self.soup.find("span", {"data-reactid": "14"})
@@ -55,9 +53,15 @@ class Stock():
 
 
 if __name__ == "__main__":
-    for sn in ["MMM", "GILD", "PG", "MSFT", "DIS", "WFC"]:
+
+    stocks = ["MMM", "GILD", "PG", "MSFT", "DIS", "WFC"]
+
+    def stock_test(sn):
         s = Stock(code=sn)
         s.get_price()
         for k in s.dat.keys():
             print("{:15}".format(k), s.dat[k])
         print()
+
+    with mp.Pool(len(stocks)) as p:
+        p.map(stock_test, stocks)
