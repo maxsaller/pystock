@@ -1,7 +1,8 @@
 import os
 import bs4
-import json as js
+import time
 import requests as rq
+import faster_than_requests as ftr
 
 
 class Stock():
@@ -15,9 +16,19 @@ class Stock():
         else:
             self.dat["code"] = code
 
-        # Start cooking
+        # Get ingredients
+        st = time.time()
         r = rq.get(f"https://finance.yahoo.com/quote/{self.dat['code']}")
+        print(f"requests time: {time.time()-st}")
+
+        st = time.time()
+        r = ftr.get2text(f"https://finance.yahoo.com/quote/{self.dat['code']}")
+        print(f"ftr time: {time.time()-st}")
+
+        # Start cooking
+        st = time.time()
         self.soup = bs4.BeautifulSoup(r.text, features="html5lib")
+        print(f"soup time: {time.time()-st}")
 
         # Stock name
         if name is None:
